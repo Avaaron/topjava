@@ -39,9 +39,8 @@
     </tr>
     <c:forEach var="meal" items="${ mealWithExceeds }">
         <fmt:parseDate value="${ meal.dateTime }" pattern="yyyy-MM-dd'T'HH:mm" var="parsedTime" type="both" />
-
-        <c:if test="${ meal.exceed == true }">
-            <tr style="color: red">
+        <c:set var="color" value="${ meal.exceed ? 'red' : 'green' }" />
+            <tr style="color: ${color}">
                 <td>
                     <fmt:formatDate pattern="dd.MM.yyy HH:mm" value="${ parsedTime }" />
                 </td>
@@ -52,20 +51,6 @@
                     ${ meal.calories }
                 </td>
             </tr>
-        </c:if>
-        <c:if test="${ meal.exceed == false }">
-            <tr style="color: green">
-                <td>
-                    <fmt:formatDate pattern="dd.MM.yyy HH:mm" value="${ parsedTime }" />
-                </td>
-                <td>
-                        ${ meal.description }
-                </td>
-                <td>
-                        ${ meal.calories }
-                </td>
-            </tr>
-        </c:if>
     </c:forEach>
 
 </table>
