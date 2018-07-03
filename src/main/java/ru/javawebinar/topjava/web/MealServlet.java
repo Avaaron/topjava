@@ -7,25 +7,28 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealWithExceed;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
-    private MealDao mealDao;
+    private MealDaoImpl mealDaoImpl;
 
-    public MealServlet() {
-        super();
-        this.mealDao = new MealDaoImpl();
+
+
+    @Override
+    public void init() throws ServletException {
+        this.mealDaoImpl =new MealDaoImpl();
     }
 
     @Override
@@ -33,20 +36,18 @@ public class MealServlet extends HttpServlet {
         log.debug("redirect to meals");
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("act");
-        if (action != null){
-            if (action.equalsIgnoreCase("delete")){
+        if (action != null) {
+            if (action.equalsIgnoreCase("delete")) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                mealDao.delete(id);
+                mealDaoImpl.delete(id);
             } else if (action.equalsIgnoreCase("edit")) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Meal unit = mealDao.getOneById(id);
-                request.setAttribute("unitDescription", unit.getDescription());
-                request.setAttribute("unitId", unit.getId() );
-                request.setAttribute("unitCalories", unit.getCalories());
+                Meal unit = mealDaoImpl.getOneById(id);
+                request.setAttribute("unit", unit);
             }
         }
-        List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDao.mealListDB, LocalTime.MIN,
-                    LocalTime.MAX, 2000);
+        List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDaoImpl.mealListDB, LocalTime.MIN,
+                LocalTime.MAX, 2000);
         request.setAttribute("mealWithExceeds", mealWithExceeds);
         request.getRequestDispatcher("meals.jsp").forward(request, response);
 
@@ -57,17 +58,38 @@ public class MealServlet extends HttpServlet {
         log.debug("redirect to meals after create");
         req.setCharacterEncoding("UTF-8");
         String description = req.getParameter("description");
+        String dateTimeStr = req.getParameter("dateTime");
+        String message = new String();
         int calories = Integer.parseInt(req.getParameter("calories"));
         if(req.getParameter("mealId") == null || req.getParameter("mealId").isEmpty()) {
-            mealDao.create(LocalDateTime.now(), description, calories);
+            if(dateTimeStr.isEmpty() || dateTimeStr == null) {
+                mealDaoImpl.create(LocalDateTime.now(), description, calories);
+            } else {
+                try{
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+                    LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, formatter);
+                    mealDaoImpl.create(dateTime, description, calories);
+                } catch (Exception e){
+                    message = "Неверный формат даты!!! Дату и время необходимо ввести в формате: dd.MM.yyyy HH:mm";
+                }
+            }
         }else {
             int id = Integer.parseInt(req.getParameter("mealId"));
-            mealDao.update(id, description, calories);
-        }
-        List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDao.mealListDB, LocalTime.MIN,
-                LocalTime.MAX, 2000);
+            LocalDateTime dateTime = null;
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+                dateTime = LocalDateTime.parse(dateTimeStr, formatter);
+                mealDaoImpl.update(id, dateTime, description, calories);
+            } catch (Exception e) {
+                message = "Неверный формат даты!!! Дату и время необходимо ввести в формате: dd.MM.yyyy HH:mm";
+            }
 
+        }
+        List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDaoImpl.mealListDB, LocalTime.MIN,
+                LocalTime.MAX, 2000);
+        req.setAttribute("message", message);
         req.setAttribute("mealWithExceeds", mealWithExceeds);
-        req.getRequestDispatcher("meals.jsp").forward(req, resp);
+        resp.sendRedirect("meals");
+
     }
 }

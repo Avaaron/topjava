@@ -1,12 +1,18 @@
 package ru.javawebinar.topjava.dao;
 
 import ru.javawebinar.topjava.model.Meal;
+import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MealDaoImpl implements MealDao{
+
+    public static List<Meal> mealListDB = Collections.synchronizedList(new ArrayList<>(MealsUtil.meals));
 
     private static AtomicInteger idCounter = new AtomicInteger(6);
 
@@ -18,9 +24,10 @@ public class MealDaoImpl implements MealDao{
     }
 
     @Override
-    public void update(int id, String description, int calories) {
-        for (Meal meal : mealListDB) {
-            if (meal.getId() == id){
+    public void update(int id, LocalDateTime dateTime, String description, int calories) {
+        for ( Meal meal : mealListDB) {
+            if (meal.getId() == id) {
+                meal.setDateTime(dateTime);
                 meal.setDescription(description);
                 meal.setCalories(calories);
             }
@@ -39,10 +46,6 @@ public class MealDaoImpl implements MealDao{
         mealListDB.remove(meal);
     }
 
-    @Override
-    public void read(int id) {
-
-    }
 
     @Override
     public Meal getOneById(int id) {
