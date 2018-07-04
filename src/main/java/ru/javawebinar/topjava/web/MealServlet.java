@@ -7,7 +7,6 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealWithExceed;
 import ru.javawebinar.topjava.util.MealsUtil;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,13 +21,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
-    private MealDaoImpl mealDaoImpl;
+    private MealDao mealDaoImpl;
 
 
 
     @Override
     public void init() throws ServletException {
-        this.mealDaoImpl =new MealDaoImpl();
+        this.mealDaoImpl = new MealDaoImpl();
     }
 
     @Override
@@ -40,16 +39,22 @@ public class MealServlet extends HttpServlet {
             if (action.equalsIgnoreCase("delete")) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 mealDaoImpl.delete(id);
+                response.sendRedirect("meals");
             } else if (action.equalsIgnoreCase("edit")) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 Meal unit = mealDaoImpl.getOneById(id);
                 request.setAttribute("unit", unit);
+                List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDaoImpl.getAll(), LocalTime.MIN,
+                        LocalTime.MAX, 2000);
+                request.setAttribute("mealWithExceeds", mealWithExceeds);
+                request.getRequestDispatcher("meals.jsp").forward(request, response);
             }
+        }else {
+            List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDaoImpl.getAll(), LocalTime.MIN,
+                    LocalTime.MAX, 2000);
+            request.setAttribute("mealWithExceeds", mealWithExceeds);
+            request.getRequestDispatcher("meals.jsp").forward(request, response);
         }
-        List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDaoImpl.mealListDB, LocalTime.MIN,
-                LocalTime.MAX, 2000);
-        request.setAttribute("mealWithExceeds", mealWithExceeds);
-        request.getRequestDispatcher("meals.jsp").forward(request, response);
 
     }
 
@@ -63,12 +68,12 @@ public class MealServlet extends HttpServlet {
         int calories = Integer.parseInt(req.getParameter("calories"));
         if(req.getParameter("mealId") == null || req.getParameter("mealId").isEmpty()) {
             if(dateTimeStr.isEmpty() || dateTimeStr == null) {
-                mealDaoImpl.create(LocalDateTime.now(), description, calories);
+                mealDaoImpl.create(new Meal(LocalDateTime.now(), description, calories));
             } else {
                 try{
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
                     LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, formatter);
-                    mealDaoImpl.create(dateTime, description, calories);
+                    mealDaoImpl.create(new Meal(dateTime, description, calories));
                 } catch (Exception e){
                     message = "Неверный формат даты!!! Дату и время необходимо ввести в формате: dd.MM.yyyy HH:mm";
                 }
@@ -79,13 +84,15 @@ public class MealServlet extends HttpServlet {
             try {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
                 dateTime = LocalDateTime.parse(dateTimeStr, formatter);
-                mealDaoImpl.update(id, dateTime, description, calories);
+                Meal mealForUpdate = new Meal(dateTime, description, calories);
+                mealForUpdate.setId(id);
+                mealDaoImpl.update(mealForUpdate);
             } catch (Exception e) {
                 message = "Неверный формат даты!!! Дату и время необходимо ввести в формате: dd.MM.yyyy HH:mm";
             }
 
         }
-        List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDaoImpl.mealListDB, LocalTime.MIN,
+        List<MealWithExceed> mealWithExceeds = MealsUtil.getFilteredWithExceeded(mealDaoImpl.getAll(), LocalTime.MIN,
                 LocalTime.MAX, 2000);
         req.setAttribute("message", message);
         req.setAttribute("mealWithExceeds", mealWithExceeds);
