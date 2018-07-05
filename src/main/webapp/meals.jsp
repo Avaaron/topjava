@@ -45,7 +45,6 @@
         <fmt:parseDate value="${meal.dateTime}" pattern="yyyy-MM-dd'T'HH:mm" var="parsedTime" type="both" />
         <c:set var="color" value="${meal.exceed ? 'red' : 'green' }" />
             <tr style="color: ${color}">
-                <td>${meal.id}</td>
                 <td>
                     <fmt:formatDate pattern="dd.MM.yyy HH:mm" value="${parsedTime}" />
                 </td>
