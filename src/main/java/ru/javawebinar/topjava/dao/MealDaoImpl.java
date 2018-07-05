@@ -2,17 +2,17 @@ package ru.javawebinar.topjava.dao;
 
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.MealsUtil;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
 
 public class MealDaoImpl implements MealDao{
-    private Map<Integer, Meal> mealMapDB = new ConcurrentSkipListMap<>();
+    private Map<Integer, Meal> mealMapDB = new ConcurrentHashMap<>();
     private AtomicInteger idCounter = new AtomicInteger(6);
 
     public MealDaoImpl(){
@@ -23,29 +23,22 @@ public class MealDaoImpl implements MealDao{
 
     @Override
     public List<Meal> getAll() {
-        List<Meal> mealsList = new ArrayList<>();
-        for (Map.Entry<Integer, Meal> pair : mealMapDB.entrySet()){
-            mealsList.add(pair.getValue());
-        }
-        return mealsList;
+        return new CopyOnWriteArrayList<>(mealMapDB.values());
     }
 
     @Override
     public Meal create(Meal meal) {
         Meal item = new Meal(meal.getDateTime(), meal.getDescription(), meal.getCalories());
-        mealMapDB.put(idCounter.incrementAndGet(), item);
+        int id = idCounter.incrementAndGet();
+        item.setId(id);
+        mealMapDB.put(id, item);
         return item;
     }
 
     @Override
     public Meal update(Meal meal) {
-        Meal item = null;
-        item = mealMapDB.get(meal.getId());
-        item.setDateTime(meal.getDateTime());
-        item.setDescription(meal.getDescription());
-        item.setCalories(meal.getCalories());
-        mealMapDB.put(meal.getId(), item);
-        return item;
+        mealMapDB.put(meal.getId(), meal);
+        return meal;
     }
 
     @Override
