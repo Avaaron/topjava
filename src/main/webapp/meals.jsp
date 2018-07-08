@@ -20,6 +20,56 @@
 <section>
     <h3><a href="index.html">Home</a></h3>
     <h2>Meals</h2>
+    <h3>Фильтр по дате и времени</h3>
+    <c:set var="startDate" value="${startDate}" />
+    <c:set var="endDate" value="${endDate}" />
+    <c:set var="startTime" value="${startTime}" />
+    <c:set var="endTime" value="${endTime}" />
+    <form method="get" name="timeFilter">
+        <table>
+            <tr>
+                <td>
+                    От даты
+                </td>
+                <td>
+                    От времени
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="date" name="startDate" value="${startDate}"/>
+                </td>
+                <td>
+                    <input type="time" name="startTime" value="${startTime}"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    До даты
+                </td>
+                <td>
+                    До времени
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="date" name="endDate" value="${endDate}" />
+                </td>
+                <td>
+                    <input type="time" name="endTime" value="${endTime}"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="submit" name="sendDateFilter" value="Применить">
+
+                </td>
+                <td>
+                    <input type="submit" name="clean" value="Очистить">
+                </td>
+            </tr>
+        </table>
+    </form>
     <a href="meals?action=create">Add Meal</a>
     <hr/>
     <table border="1" cellpadding="8" cellspacing="0">
@@ -33,7 +83,7 @@
         </tr>
         </thead>
         <c:forEach items="${meals}" var="meal">
-            <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.model.MealWithExceed"/>
+            <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.to.MealWithExceed"/>
             <tr class="${meal.exceed ? 'exceeded' : 'normal'}">
                 <td>
                         <%--${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}--%>

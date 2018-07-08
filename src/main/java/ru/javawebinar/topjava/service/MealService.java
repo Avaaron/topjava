@@ -16,5 +16,5 @@ public interface MealService {
 
     void update(Meal meal);
 
-    Collection<MealWithExceed> getAll(int userId);
+    Collection<Meal> getAll(int userId);
 }

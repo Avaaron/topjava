@@ -7,9 +7,16 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealWithExceed;
+import ru.javawebinar.topjava.util.DateTimeUtil;
+import ru.javawebinar.topjava.util.MealsUtil;
+import ru.javawebinar.topjava.web.SecurityUtil;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
@@ -21,9 +28,35 @@ public class MealRestController {
     @Autowired
     private MealService service;
 
-    public List<MealWithExceed> getAll(int userId){
+    public List<Meal> getAll(int userId){
         log.info("getAll");
-        return new ArrayList<>(service.getAll(userId));
+        return (List<Meal>) service.getAll(userId);
+    }
+
+    public List<MealWithExceed>getFiltred(int userId, String startDateStr, String startTimeStr, String endDateStr, String endTimeStr){
+        log.info("getFiltred");
+        LocalDate startLocalDate;
+        LocalTime startLocalTime;
+        LocalDate endLocalDate;
+        LocalTime endLocalTime;
+
+        List<MealWithExceed> mealWithExceeds;
+        if (startDateStr == null) {
+            mealWithExceeds = MealsUtil.getWithExceeded(getAll(userId), LocalTime.MIN, LocalTime.MAX, SecurityUtil.authUserCaloriesPerDay());
+        } else {
+            if (startDateStr.isEmpty()) startLocalDate = LocalDate.MIN;
+            else startLocalDate = LocalDate.parse(startDateStr);
+            if (endDateStr.isEmpty()) endLocalDate = LocalDate.MAX;
+            else endLocalDate = LocalDate.parse(endDateStr);
+            if (startTimeStr.isEmpty()) startLocalTime = LocalTime.MIN;
+            else startLocalTime = LocalTime.parse(startTimeStr);
+            if (endTimeStr.isEmpty()) endLocalTime = LocalTime.MAX;
+            else endLocalTime = LocalTime.parse(endTimeStr);
+            mealWithExceeds = MealsUtil.getWithExceeded(getAll(userId), startLocalTime, endLocalTime, SecurityUtil.authUserCaloriesPerDay()).stream()
+                    .filter(mealWithExceed -> DateTimeUtil.isBetweenDate(mealWithExceed.getDateTime().toLocalDate(), startLocalDate, endLocalDate))
+                    .collect(Collectors.toList());
+            }
+        return mealWithExceeds;
     }
 
     public Meal get(int id, int userId){
@@ -39,6 +72,7 @@ public class MealRestController {
 
     public void delete(int id) {
         log.info("delete {}", id);
+        service.delete(id);
     }
 
     public void update(Meal meal, int id) {
