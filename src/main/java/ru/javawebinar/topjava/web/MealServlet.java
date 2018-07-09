@@ -5,11 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.repository.mock.InMemoryMealRepositoryImpl;
-import ru.javawebinar.topjava.to.MealWithExceed;
-import ru.javawebinar.topjava.util.DateTimeUtil;
-import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import javax.servlet.ServletConfig;
@@ -19,9 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Objects;
 
 public class MealServlet extends HttpServlet {
@@ -34,9 +27,15 @@ public class MealServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        try(ConfigurableApplicationContext cappCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml")) {
-             mealRestController = cappCtx.getBean(MealRestController.class);
-        }
+       try(ConfigurableApplicationContext cappCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml")) {
+           mealRestController = cappCtx.getBean(MealRestController.class);
+       }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+
     }
 
     @Override
@@ -53,7 +52,7 @@ public class MealServlet extends HttpServlet {
         if (meal.isNew()) {
             mealRestController.create(meal);
         } else {
-            mealRestController.update(meal, Integer.valueOf(id));
+            mealRestController.update(meal);
         }
         response.sendRedirect("meals");
     }
@@ -72,7 +71,7 @@ public class MealServlet extends HttpServlet {
             case "update":
                 final Meal meal = "create".equals(action) ?
                         new Meal(SecurityUtil.authUserId(), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
-                        mealRestController.get(getId(request), SecurityUtil.authUserId());
+                        mealRestController.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
@@ -85,20 +84,25 @@ public class MealServlet extends HttpServlet {
                 String endTimeStr = request.getParameter("endTime");
                 String clean = request.getParameter("clean");
                 if (clean != null) {
-                    startDateStr = "";
-                    startTimeStr = "";
-                    endDateStr = "";
-                    endTimeStr ="";
+                    startDateStr = null;
+                    startTimeStr = null;
+                    endDateStr = null;
+                    endTimeStr = null;
+                    response.sendRedirect("meals");
                 }
-                List<MealWithExceed> mealWithExceeds = mealRestController.getFiltred(SecurityUtil.authUserId(), startDateStr, startTimeStr, endDateStr, endTimeStr);
-                if(startDateStr != null) {
+                else if(startDateStr == null) {
+                    request.setAttribute("meals", mealRestController.getAll());
+                    request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                }
+                else {
                     request.setAttribute("startDate", startDateStr);
                     request.setAttribute("endDate", endDateStr);
                     request.setAttribute("startTime", startTimeStr);
                     request.setAttribute("endTime", endTimeStr);
+                    request.setAttribute("meals", mealRestController.getFiltred(startDateStr, startTimeStr, endDateStr, endTimeStr));
+                    request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 }
-                request.setAttribute("meals", mealWithExceeds);
-                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+
 
                 break;
         }

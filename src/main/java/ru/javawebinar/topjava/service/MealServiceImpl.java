@@ -5,10 +5,14 @@ import org.springframework.stereotype.Service;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
+import ru.javawebinar.topjava.web.SecurityUtil;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -23,22 +27,29 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public Meal create(Meal meal){
+
        return repository.save(meal);
     }
 
     @Override
-    public void delete(int id) throws NotFoundException{
-        checkNotFoundWithId(repository.delete(id), id);
+    public void delete(int id, int userId) throws NotFoundException{
+        checkNotFoundWithId(repository.delete(id, userId), id);
+    }
+
+    @Override
+    public Collection<Meal> getRepositotyFilter(int userId, LocalDate startLocalDate, LocalDate endLocalDate, LocalTime startLocalTime, LocalTime endLocalTime) {
+        return repository.filter(userId, startLocalDate, endLocalDate, startLocalTime, endLocalTime);
     }
 
     @Override
     public Meal get(int id, int userId) {
+
         return repository.get(id, userId);
     }
 
     @Override
-    public void update(Meal meal) {
-        checkNotFoundWithId(repository.save(meal), meal.getId());
+    public void update(Meal meal, int userId) {
+        if(meal.getUserId() == userId) checkNotFoundWithId(repository.save(meal), meal.getId());
     }
 
     @Override
