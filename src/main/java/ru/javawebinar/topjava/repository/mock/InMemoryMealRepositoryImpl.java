@@ -10,7 +10,6 @@ import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,28 +22,33 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.MEALS.forEach(this::save);
+        for (Meal MEAL : MealsUtil.MEALS) {
+            MEAL.setId(counter.incrementAndGet());
+            repository.put(MEAL.getId(), MEAL);
+        }
     }
 
     @Override
-    public Meal save(Meal meal) {
-        log.info("save {}", meal);
-        if (meal.isNew()) {
+    public Meal save(Meal meal, int userId) {
+
+            log.info("save {}", meal);
+            if (meal.isNew()) {
                 meal.setId(counter.incrementAndGet());
                 repository.put(meal.getId(), meal);
                 return meal;
-        }
-        // treat case: update, but absent in storage
-        return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+            } else if (meal.getUserId() == userId) {
+                // treat case: update, but absent in storage
+                return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+            }
+            else return null;
+
     }
 
     @Override
     public boolean delete(int id, int userId) {
         log.info("delete {}", id);
-        if(!repository.values().stream()
-                .filter(meal -> (meal.getId() == id && meal.getUserId() == userId))
-                .collect(Collectors.toList())
-                .isEmpty()) {
+        Meal meal = get(id, userId);
+        if (meal != null && meal.getUserId() == userId) {
             repository.remove(id);
             return true;
         }
@@ -54,25 +58,25 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     @Override
     public Meal get(int id, int userId) {
         log.info("get {}", id, userId);
-        if(!repository.containsKey(id) || userId != repository.get(id).getUserId()) return null;
-        else return repository.get(id);
+        if(repository.containsKey(id) && userId == repository.get(id).getUserId()) return repository.get(id);
+        else return null;
 
     }
 
     @Override
-    public List<Meal> getAll(int userId) {
+    public List<Meal> getAll() {
         log.info("getAll");
         return repository.values().stream()
+                .filter(meal -> meal.getUserId() == SecurityUtil.authUserId())
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                .filter(meal -> meal.getUserId().equals(userId))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Meal> filter(int userId, LocalDate startLocalDate, LocalDate endLocalDate, LocalTime startLocalTime, LocalTime endLocalTime) {
+    public List<Meal> filter(LocalDate startLocalDate, LocalDate endLocalDate) {
         return repository.values().stream()
-                .filter(meal -> DateTimeUtil.isBetween(meal.getTime(), startLocalTime, endLocalTime) &&
-                        DateTimeUtil.isBetweenDate(meal.getDate(), startLocalDate, endLocalDate))
+                .filter(meal -> meal.getUserId() == SecurityUtil.authUserId() && DateTimeUtil.isBetweenDate(meal.getDate(), startLocalDate, endLocalDate))
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 }

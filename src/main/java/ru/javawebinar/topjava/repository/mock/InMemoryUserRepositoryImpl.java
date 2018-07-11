@@ -7,6 +7,7 @@ import ru.javawebinar.topjava.model.AbstractNamedEntity;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,10 +23,7 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     @Override
     public boolean delete(int id) {
         log.info("delete {}", id);
-        if(repository.containsKey(id)) {
-            repository.remove(id);
-            return true;
-        }
+        if(repository.remove(id) != null) return true;
         else return false;
     }
 
@@ -49,16 +47,27 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getAll() {
         log.info("getAll");
-        return repository.values().stream().sorted(Comparator.comparing(AbstractNamedEntity::getName))
-                .collect(Collectors.toList());
+        List<User> users = (List<User>) repository.values();
+        class UserNameComparator implements Comparator<User> {
+            @Override
+            public int compare(User o1, User o2) {
+                if (!o1.getName().equals(o2.getName())){
+                    return o1.getName().compareTo(o2.getName());
+                } else return o1.getRegistered().compareTo(o2.getRegistered());
+            }
+        }
+        Collections.sort(users, new UserNameComparator());
+        return users;
+
+
     }
 
     @Override
     public User getByEmail(String email) {
         log.info("getByEmail {}", email);
-        return repository.values().stream()
-                .filter(user -> user.getEmail().equals(email))
-                .findFirst()
-                .get();
+        if (repository.values().stream().anyMatch(user -> user.getEmail().equals(email))) {
+                return repository.values().stream().filter(user -> user.getEmail().equals(email)).findFirst().get();
+        }
+        else return null;
     }
 }

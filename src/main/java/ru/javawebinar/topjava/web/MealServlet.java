@@ -42,15 +42,19 @@ public class MealServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String id = request.getParameter("id");
 
-        Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id), SecurityUtil.authUserId(),
-                LocalDateTime.parse(request.getParameter("dateTime")),
-                request.getParameter("description"),
-                Integer.parseInt(request.getParameter("calories")));
 
-        log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-        if (meal.isNew()) {
-            mealRestController.create(meal);
+        LocalDateTime localDateTime =LocalDateTime.parse(request.getParameter("dateTime"));
+        String description = request.getParameter("description");
+        int calories = Integer.parseInt(request.getParameter("calories"));
+
+        log.info(id.isEmpty() ? "Create {}" : "Update {}");
+        if (id.isEmpty() || id == null) {
+            mealRestController.create(localDateTime, description, calories);
         } else {
+            Meal meal = mealRestController.get(Integer.valueOf(id));
+            meal.setDateTime(localDateTime);
+            meal.setDescription(description);
+            meal.setCalories(calories);
             mealRestController.update(meal);
         }
         response.sendRedirect("meals");
@@ -68,9 +72,11 @@ public class MealServlet extends HttpServlet {
                 break;
             case "create":
             case "update":
-                final Meal meal = "create".equals(action) ?
-                        new Meal(SecurityUtil.authUserId(), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
-                        mealRestController.get(getId(request));
+                String mealId = request.getParameter("id");
+                Meal meal;
+                if (mealId == null ||  mealId.isEmpty()) {
+                    meal = mealRestController.createDefaultMeal();
+                }else meal = mealRestController.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
@@ -83,10 +89,6 @@ public class MealServlet extends HttpServlet {
                 String endTimeStr = request.getParameter("endTime");
                 String clean = request.getParameter("clean");
                 if (clean != null) {
-                    startDateStr = null;
-                    startTimeStr = null;
-                    endDateStr = null;
-                    endTimeStr = null;
                     response.sendRedirect("meals");
                 }
                 else if(startDateStr == null) {
