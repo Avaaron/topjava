@@ -75,7 +75,7 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     @Override
     public List<Meal> filter(LocalDate startLocalDate, LocalDate endLocalDate) {
         return repository.values().stream()
-                .filter(meal -> meal.getUserId() == SecurityUtil.authUserId() && DateTimeUtil.isBetweenDate(meal.getDate(), startLocalDate, endLocalDate))
+                .filter(meal -> meal.getUserId() == SecurityUtil.authUserId() && DateTimeUtil.isBetween(meal.getDate(), startLocalDate, endLocalDate))
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
