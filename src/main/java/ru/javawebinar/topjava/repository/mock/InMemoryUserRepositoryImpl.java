@@ -47,19 +47,10 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getAll() {
         log.info("getAll");
-        List<User> users = (List<User>) repository.values();
-        class UserNameComparator implements Comparator<User> {
-            @Override
-            public int compare(User o1, User o2) {
-                if (!o1.getName().equals(o2.getName())){
-                    return o1.getName().compareTo(o2.getName());
-                } else return o1.getRegistered().compareTo(o2.getRegistered());
-            }
-        }
-        Collections.sort(users, new UserNameComparator());
-        return users;
-
-
+        return repository.values().stream()
+                .sorted((o1, o2) -> {if (o1.getName().equals(o2.getName())) return o1.getRegistered().compareTo(o2.getRegistered());
+                else return o1.getName().compareTo(o2.getName()); })
+                .collect(Collectors.toList());
     }
 
     @Override
