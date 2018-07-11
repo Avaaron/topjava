@@ -48,9 +48,9 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     public List<User> getAll() {
         log.info("getAll");
         return repository.values().stream()
-                .sorted((o1, o2) -> {if (o1.getName().equals(o2.getName())) return o1.getRegistered().compareTo(o2.getRegistered());
-                else return o1.getName().compareTo(o2.getName()); })
-                .collect(Collectors.toList());
+                .sorted((o1, o2) -> o1.getName().equals(o2.getName()) ? o1.getRegistered().compareTo(o2.getRegistered())
+                        : o1.getName().compareTo(o2.getName()))
+        .collect(Collectors.toList());
     }
 
     @Override
