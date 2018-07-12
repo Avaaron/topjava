@@ -42,19 +42,16 @@ public class MealServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String id = request.getParameter("id");
 
-
         LocalDateTime localDateTime =LocalDateTime.parse(request.getParameter("dateTime"));
         String description = request.getParameter("description");
         int calories = Integer.parseInt(request.getParameter("calories"));
 
         log.info(id.isEmpty() ? "Create {}" : "Update {}");
+        Meal meal = new Meal(null,localDateTime.truncatedTo(ChronoUnit.MINUTES), description, calories);
         if (id.isEmpty() || id == null) {
-            mealRestController.create(localDateTime, description, calories);
+            mealRestController.create(meal);
         } else {
-            Meal meal = mealRestController.get(Integer.valueOf(id));
-            meal.setDateTime(localDateTime);
-            meal.setDescription(description);
-            meal.setCalories(calories);
+            meal.setId(Integer.valueOf(id));
             mealRestController.update(meal);
         }
         response.sendRedirect("meals");
@@ -75,7 +72,7 @@ public class MealServlet extends HttpServlet {
                 String mealId = request.getParameter("id");
                 Meal meal;
                 if (mealId == null ||  mealId.isEmpty()) {
-                    meal = mealRestController.createDefaultMeal();
+                    meal = new Meal(null, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
                 }else meal = mealRestController.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);

@@ -3,11 +3,8 @@ package ru.javawebinar.topjava.repository.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
-import ru.javawebinar.topjava.model.AbstractNamedEntity;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
-
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,8 +20,7 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     @Override
     public boolean delete(int id) {
         log.info("delete {}", id);
-        if(repository.remove(id) != null) return true;
-        else return false;
+        return repository.remove(id) != null;
     }
 
     @Override
@@ -56,9 +52,6 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     @Override
     public User getByEmail(String email) {
         log.info("getByEmail {}", email);
-        if (repository.values().stream().anyMatch(user -> user.getEmail().equals(email))) {
-                return repository.values().stream().filter(user -> user.getEmail().equals(email)).findFirst().get();
-        }
-        else return null;
+        return repository.values().stream().filter(user -> user.getEmail().equals(email)).findFirst().orElse(null);
     }
 }

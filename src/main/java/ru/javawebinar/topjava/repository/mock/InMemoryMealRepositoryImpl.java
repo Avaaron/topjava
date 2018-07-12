@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Repository
@@ -29,18 +30,17 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     }
 
     @Override
-    public Meal save(Meal meal, int userId) {
+    public Meal save(Meal meal) {
 
             log.info("save {}", meal);
             if (meal.isNew()) {
                 meal.setId(counter.incrementAndGet());
                 repository.put(meal.getId(), meal);
                 return meal;
-            } else if (meal.getUserId() == userId) {
+            } else if (meal.getUserId() == repository.get(meal.getId()).getUserId()) {
                 // treat case: update, but absent in storage
                 return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
-            }
-            else return null;
+            } else return null;
 
     }
 
@@ -58,26 +58,26 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     @Override
     public Meal get(int id, int userId) {
         log.info("get {}", id, userId);
-        if(repository.containsKey(id) && userId == repository.get(id).getUserId()) return repository.get(id);
+        Meal meal = repository.get(id);
+        if (meal != null && meal.getUserId() == userId) return meal;
         else return null;
-
     }
 
     @Override
-    public List<Meal> getAll() {
+    public List<Meal> getAll(int userId) {
         log.info("getAll");
         return repository.values().stream()
-                .filter(meal -> meal.getUserId() == SecurityUtil.authUserId())
+                .filter(meal -> meal.getUserId() == userId)
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Meal> filter(LocalDate startLocalDate, LocalDate endLocalDate) {
-        return repository.values().stream()
-                .filter(meal -> meal.getUserId() == SecurityUtil.authUserId() && DateTimeUtil.isBetween(meal.getDate(), startLocalDate, endLocalDate))
+    public List<Meal> filter(int userId, LocalDate startLocalDate, LocalDate endLocalDate) {
+        return getAll(userId).stream().filter(meal -> DateTimeUtil.isBetween(meal.getDate(), startLocalDate, endLocalDate))
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
+
     }
 }
 

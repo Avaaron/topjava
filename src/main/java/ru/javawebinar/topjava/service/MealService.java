@@ -9,15 +9,15 @@ import java.util.List;
 
 public interface MealService {
 
-    Meal create(Meal meal, int userId);
+    Meal create(Meal meal);
 
     void delete(int id, int userId) throws NotFoundException;
 
     Meal get(int id, int userId) throws NotFoundException;
 
-    void update(Meal meal, int userId);
+    void update(Meal meal);
 
-    List<Meal> getAll();
+    List<MealWithExceed> getAll(int userId);
 
-    List<MealWithExceed> getRepositotyFilter (LocalDate startLocalDate, LocalDate endLocalDate, LocalTime startLocalTime, LocalTime endLocalTime);
+    List<MealWithExceed> getRepositotyFilter (int userId, LocalDate startLocalDate, LocalDate endLocalDate, LocalTime startLocalTime, LocalTime endLocalTime);
 }

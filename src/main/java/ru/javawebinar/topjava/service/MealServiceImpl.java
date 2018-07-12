@@ -26,9 +26,9 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public Meal create(Meal meal, int userId){
+    public Meal create(Meal meal){
 
-       return repository.save(meal, userId);
+       return repository.save(meal);
     }
 
     @Override
@@ -37,8 +37,8 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public List<MealWithExceed> getRepositotyFilter(LocalDate startLocalDate, LocalDate endLocalDate, LocalTime startLocalTime, LocalTime endLocalTime) {
-        return MealsUtil.getWithExceeded(repository.filter(startLocalDate, endLocalDate), startLocalTime, endLocalTime, MealsUtil.DEFAULT_CALORIES_PER_DAY);
+    public List<MealWithExceed> getRepositotyFilter(int userId, LocalDate startLocalDate, LocalDate endLocalDate, LocalTime startLocalTime, LocalTime endLocalTime) {
+        return MealsUtil.getWithExceeded(repository.filter(userId,startLocalDate, endLocalDate), startLocalTime, endLocalTime, MealsUtil.DEFAULT_CALORIES_PER_DAY);
     }
 
     @Override
@@ -47,13 +47,13 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public void update(Meal meal, int userId) {
-        checkNotFoundWithId(repository.save(meal, userId), meal.getId());
+    public void update(Meal meal) {
+        checkNotFoundWithId(repository.save(meal), meal.getId());
     }
 
     @Override
-    public List<Meal> getAll(){
-        return repository.getAll();
+    public List<MealWithExceed> getAll(int userId){
+        return MealsUtil.getWithExceeded(repository.getAll(userId), LocalTime.MIN, LocalTime.MAX, SecurityUtil.authUserCaloriesPerDay());
     }
 
 }

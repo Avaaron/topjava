@@ -24,7 +24,7 @@ public class SpringMain {
             adminUserController.create(new User(null, "userName", "email@mail.ru", "password", Role.ROLE_ADMIN));
             MealRestController mealRestController = appCtx.getBean(MealRestController.class);
             SecurityUtil.setAuthUserId(1);
-            Meal meal = mealRestController.create(LocalDateTime.of(2018, Month.MAY, 30, 10, 0), "Завтрак", 500);
+            Meal meal = mealRestController.create(new Meal(null, LocalDateTime.of(2018, Month.MAY, 30, 10, 0), "Завтрак", 500));
             System.out.println(meal.getUserId());
         }
     }
