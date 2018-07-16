@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -38,30 +39,57 @@ public class MealServiceTest {
     private MealService service;
 
     @Test
-    public void getBetweenDates() {
+    public void getBetweenDatesIfNormalUserId() {
         List<Meal> list = service.getBetweenDates(LocalDate.of(2015, Month.MAY, 30),
                 LocalDate.of(2015, Month.MAY, 31),MealTestData.AUHT_USER);
         MealTestData.assertMatch(list, MealTestData.MEAL3, MealTestData.MEAL2, MealTestData.MEAL1);
     }
 
     @Test
-    public void getBetweenDateTimes() {
+    public void getBetweenDatesIfAlienUserId() {
+        List<Meal> list = service.getBetweenDates(LocalDate.of(2015, Month.MAY, 30),
+                LocalDate.of(2015, Month.MAY, 31), MealTestData.WRONG_USER);
+        MealTestData.assertMatch(list, new ArrayList<>());
+    }
+
+    @Test
+    public void getBetweenDateTimesIfNormalUserId() {
         List<Meal> list = service.getBetweenDateTimes(LocalDateTime.of(2015, Month.MAY, 30, 9, 0),
                 LocalDateTime.of(2015, Month.MAY, 30, 14, 0), MealTestData.AUHT_USER);
         MealTestData.assertMatch(list, MealTestData.MEAL2, MealTestData.MEAL1);
     }
 
-    @Test(expected = NotFoundException.class)
-    public void get() {
-        service.get(5, MealTestData.AUHT_USER + 100000);
+    @Test
+    public void getBetweenDateTimesIfAlienUserId() {
+        List<Meal> list = service.getBetweenDateTimes(LocalDateTime.of(2015, Month.MAY, 30, 9, 0),
+                LocalDateTime.of(2015, Month.MAY, 30, 14, 0), MealTestData.WRONG_USER);
+        MealTestData.assertMatch(list, new ArrayList<>());
     }
 
     @Test(expected = NotFoundException.class)
-    public void delete() {
-        service.delete(5, MealTestData.AUHT_USER + 1000000);
+    public void getifAlienUserId() {
+        service.get(100006, MealTestData.WRONG_USER);
     }
 
+    @Test(expected = NotFoundException.class)
+    public void getIfNormalUserIdButIdisOutOfRange() {
+        service.get(100009, MealTestData.AUHT_USER );
+    }
 
+    @Test
+    public void getIfAllOk() {
+        service.get(100003, MealTestData.AUHT_USER );
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void deleteIfWrongUserId() {
+        service.delete(100006, MealTestData.WRONG_USER);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void deleteIfIdIsAbsent() {
+        service.delete(100009, MealTestData.AUHT_USER);
+    }
 
     @Test
     public void getAll() {
@@ -70,19 +98,35 @@ public class MealServiceTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void update() {
+    public void updateIfAlienUserId() {
         Meal upd = MealTestData.MEAL6;
-        upd.setId(6);
         upd.setCalories(300);
         upd.setDescription("upd");
         service.update(upd, MealTestData.AUHT_USER);
-        MealTestData.assertMatch(service.get(6, 100001), upd);
+        MealTestData.assertMatch(service.get(100007, MealTestData.WRONG_USER), upd);
+        upd.setDescription("завтрак");
+        upd.setCalories(500);
+        service.update(upd, MealTestData.AUHT_USER + 1);
     }
 
     @Test
-    public void create() {
+    public void updateIfUserIdOK() {
+        Meal upd = MealTestData.MEAL1;
+        upd.setCalories(300);
+        upd.setDescription("upd");
+        service.update(upd, MealTestData.AUHT_USER);
+        MealTestData.assertMatch(service.get(100002, MealTestData.AUHT_USER), upd);
+        upd.setDescription("завтрак");
+        upd.setCalories(500);
+        service.update(upd, MealTestData.AUHT_USER );
+    }
+
+    @Test
+    public void createIfUserIdIsOK() {
         Meal newMeal = new Meal(null, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "завтрак", 500);
         Meal createdMeal = service.create(newMeal, MealTestData.AUHT_USER);
-        MealTestData.assertMatch(MealTestData.MEAL4, createdMeal);
+        MealTestData.assertMatch(new Meal(100008, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES),
+                "завтрак", 500), createdMeal);
     }
+
 }
