@@ -23,7 +23,8 @@ import static org.junit.Assert.*;
 
 @ContextConfiguration({
         "classpath:spring/spring-app.xml",
-        "classpath:spring/spring-db.xml"
+        "classpath:spring/spring-db.xml",
+        "classpath:spring/spring-jdbc.xml"
 })
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
@@ -39,56 +40,66 @@ public class MealServiceTest {
     private MealService service;
 
     @Test
-    public void getBetweenDatesIfNormalUserId() {
+    public void getBetweenDates() {
         List<Meal> list = service.getBetweenDates(LocalDate.of(2015, Month.MAY, 30),
                 LocalDate.of(2015, Month.MAY, 31),MealTestData.AUHT_USER);
         MealTestData.assertMatch(list, MealTestData.MEAL3, MealTestData.MEAL2, MealTestData.MEAL1);
     }
 
     @Test
-    public void getBetweenDatesIfAlienUserId() {
+    public void getBetweenDatesWrongUserId() {
         List<Meal> list = service.getBetweenDates(LocalDate.of(2015, Month.MAY, 30),
                 LocalDate.of(2015, Month.MAY, 31), MealTestData.WRONG_USER);
         MealTestData.assertMatch(list, new ArrayList<>());
     }
 
     @Test
-    public void getBetweenDateTimesIfNormalUserId() {
+    public void getBetweenDateTimes() {
         List<Meal> list = service.getBetweenDateTimes(LocalDateTime.of(2015, Month.MAY, 30, 9, 0),
                 LocalDateTime.of(2015, Month.MAY, 30, 14, 0), MealTestData.AUHT_USER);
         MealTestData.assertMatch(list, MealTestData.MEAL2, MealTestData.MEAL1);
     }
 
     @Test
-    public void getBetweenDateTimesIfAlienUserId() {
+    public void getBetweenDateTimesWrongUserId() {
         List<Meal> list = service.getBetweenDateTimes(LocalDateTime.of(2015, Month.MAY, 30, 9, 0),
                 LocalDateTime.of(2015, Month.MAY, 30, 14, 0), MealTestData.WRONG_USER);
         MealTestData.assertMatch(list, new ArrayList<>());
     }
 
     @Test(expected = NotFoundException.class)
-    public void getifAlienUserId() {
+    public void getWrongUserId() {
         service.get(100006, MealTestData.WRONG_USER);
     }
 
     @Test(expected = NotFoundException.class)
-    public void getIfNormalUserIdButIdisOutOfRange() {
+    public void getWrongId() {
         service.get(100009, MealTestData.AUHT_USER );
     }
 
     @Test
-    public void getIfAllOk() {
-        service.get(100003, MealTestData.AUHT_USER );
+    public void get() {
+       Meal meal = service.get(100003, MealTestData.AUHT_USER );
+       MealTestData.assertMatch(meal, MealTestData.MEAL2);
     }
 
     @Test(expected = NotFoundException.class)
-    public void deleteIfWrongUserId() {
+    public void deleteWrongUserId() {
         service.delete(100006, MealTestData.WRONG_USER);
     }
 
+
+
     @Test(expected = NotFoundException.class)
-    public void deleteIfIdIsAbsent() {
+    public void deleteWrongId() {
         service.delete(100009, MealTestData.AUHT_USER);
+    }
+
+    @Test
+    public void delete() {
+        service.delete(100004, MealTestData.AUHT_USER);
+        List<Meal> list = service.getAll(MealTestData.AUHT_USER);
+        MealTestData.assertMatch(list, MealTestData.MEAL2, MealTestData.MEAL1);
     }
 
     @Test
@@ -98,31 +109,25 @@ public class MealServiceTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void updateIfAlienUserId() {
+    public void updateWrongUserId() {
         Meal upd = MealTestData.MEAL6;
         upd.setCalories(300);
         upd.setDescription("upd");
-        service.update(upd, MealTestData.AUHT_USER);
-        MealTestData.assertMatch(service.get(100007, MealTestData.WRONG_USER), upd);
-        upd.setDescription("завтрак");
-        upd.setCalories(500);
-        service.update(upd, MealTestData.AUHT_USER + 1);
+        service.update(upd, MealTestData.WRONG_USER);
+
     }
 
     @Test
-    public void updateIfUserIdOK() {
-        Meal upd = MealTestData.MEAL1;
+    public void update() {
+        Meal upd = new Meal(MealTestData.MEAL1.getId(), MealTestData.MEAL1.getDateTime(), MealTestData.MEAL1.getDescription(),
+                MealTestData.MEAL1.getCalories());
         upd.setCalories(300);
-        upd.setDescription("upd");
         service.update(upd, MealTestData.AUHT_USER);
         MealTestData.assertMatch(service.get(100002, MealTestData.AUHT_USER), upd);
-        upd.setDescription("завтрак");
-        upd.setCalories(500);
-        service.update(upd, MealTestData.AUHT_USER );
     }
 
     @Test
-    public void createIfUserIdIsOK() {
+    public void create() {
         Meal newMeal = new Meal(null, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "завтрак", 500);
         Meal createdMeal = service.create(newMeal, MealTestData.AUHT_USER);
         MealTestData.assertMatch(new Meal(100008, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES),

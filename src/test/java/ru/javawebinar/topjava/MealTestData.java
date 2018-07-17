@@ -1,11 +1,9 @@
 package ru.javawebinar.topjava;
 
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.User;
 
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +22,7 @@ public class MealTestData {
     public static  Meal MEAL6 = new Meal(100007, LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "ужин", 510);
 
     public static void assertMatch(Meal actual, Meal expected) {
-        assertThat(actual).isEqualToIgnoringGivenFields(expected);
+        assertThat(actual).isEqualTo(expected);
     }
 
     public static void assertMatch(Iterable<Meal> actual, Meal... expected) {
@@ -32,7 +30,7 @@ public class MealTestData {
     }
 
     public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
-        assertThat(actual).usingElementComparatorIgnoringFields().isEqualTo(expected);
+        assertThat(actual).usingDefaultComparator().isEqualTo(expected);
     }
 
 
