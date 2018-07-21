@@ -3,7 +3,6 @@ import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.javawebinar.topjava.service.MealServiceTest;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import java.util.HashMap;
