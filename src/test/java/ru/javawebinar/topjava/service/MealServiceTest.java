@@ -3,6 +3,8 @@ package ru.javawebinar.topjava.service;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -12,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.MyStopWatchTest;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
+import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -30,7 +33,7 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
 
-
+    private static final Logger log = LoggerFactory.getLogger(MealRestController.class);
 
     @Rule
     public MyStopWatchTest myStopWatchTest = new MyStopWatchTest();
@@ -41,8 +44,6 @@ public class MealServiceTest {
     static {
         SLF4JBridgeHandler.install();
     }
-
-
 
     @Autowired
     private MealService service;
@@ -105,10 +106,10 @@ public class MealServiceTest {
 
     @AfterClass()
     public static void end(){
-        System.out.println("=================================");
+        System.out.println("==================================================================");
         for (Map.Entry<String, Long> pair: MyStopWatchTest.logs.entrySet()){
-            System.out.println(String.format("Тест %s: %d мс.", pair.getKey(), pair.getValue()));
+            log.info("Тест {}: {} мс.", pair.getKey(), pair.getValue());
         }
-        System.out.println("=================================");
+        System.out.println("==================================================================");
     }
 }

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-@Transactional(readOnly = false)
+@Transactional(readOnly = true)
 public class JpaMealRepositoryImpl implements MealRepository {
 
     @PersistenceContext
@@ -21,13 +21,13 @@ public class JpaMealRepositoryImpl implements MealRepository {
     @Override
     @Transactional
     public Meal save(Meal meal, int userId) {
-        User ref = em.find(User.class, userId);
+        User ref = em.getReference(User.class, userId);
         if (meal.isNew()) {
             meal.setUser(ref);
             em.persist(meal);
             return meal;
         } else {
-            Meal m = em.find(Meal.class, meal.getId());
+            Meal m = get(meal.getId(), userId);
             if (m != null && m.getUser().getId() == userId){
                 meal.setUser(ref);
                 em.merge(meal);
@@ -47,9 +47,7 @@ public class JpaMealRepositoryImpl implements MealRepository {
 
     @Override
     public Meal get(int id, int userId) {
-        Meal meal = em.find(Meal.class, id);
-        if (meal.getUser().getId() != userId) return null;
-        else return meal;
+        return em.find(Meal.class, id).getUser().getId() == userId ? em.find(Meal.class, id)  : null;
     }
 
     @Override
