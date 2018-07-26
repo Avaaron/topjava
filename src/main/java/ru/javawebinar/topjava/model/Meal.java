@@ -1,5 +1,8 @@
 package ru.javawebinar.topjava.model;
 
+import org.hibernate.validator.constraints.Range;
+import org.springframework.beans.factory.annotation.Value;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -31,9 +34,11 @@ public class Meal extends AbstractBaseEntity {
     private String description;
 
     @Column(name = "calories", nullable = false)
+    @Range(min = 10, max = 5000)
+    @NotNull
     private int calories;
 
-    @CollectionTable(name = "users", joinColumns = @JoinColumn(name = "id"))
+    @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private User user;

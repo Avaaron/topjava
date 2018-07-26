@@ -106,10 +106,10 @@ public class MealServiceTest {
 
     @AfterClass()
     public static void end(){
-        System.out.println("==================================================================");
+        log.info("================================");
         for (Map.Entry<String, Long> pair: MyStopWatchTest.logs.entrySet()){
             log.info("Тест {}: {} мс.", pair.getKey(), pair.getValue());
         }
-        System.out.println("==================================================================");
+        log.info("================================");
     }
 }
