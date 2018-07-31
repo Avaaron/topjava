@@ -15,18 +15,18 @@ import ru.javawebinar.topjava.repository.MealRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
-public class JdbcMealRepositoryImpl implements MealRepository {
 
-    private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
+public abstract class JdbcMealRepositoryImpl implements MealRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    protected static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    protected final JdbcTemplate jdbcTemplate;
 
-    private final SimpleJdbcInsert insertMeal;
+    protected final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Autowired
+    protected final SimpleJdbcInsert insertMeal;
+
+
     public JdbcMealRepositoryImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertMeal = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("meals")
@@ -36,13 +36,15 @@ public class JdbcMealRepositoryImpl implements MealRepository {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
+    protected abstract <T> T dateTimeHandler(LocalDateTime localDateTime);
+
     @Override
     public Meal save(Meal meal, int userId) {
         MapSqlParameterSource map = new MapSqlParameterSource()
                 .addValue("id", meal.getId())
                 .addValue("description", meal.getDescription())
                 .addValue("calories", meal.getCalories())
-                .addValue("date_time", meal.getDateTime())
+                .addValue("date_time", dateTimeHandler(meal.getDateTime()))
                 .addValue("user_id", userId);
 
         if (meal.isNew()) {
@@ -82,6 +84,6 @@ public class JdbcMealRepositoryImpl implements MealRepository {
     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM meals WHERE user_id=?  AND date_time BETWEEN  ? AND ? ORDER BY date_time DESC",
-                ROW_MAPPER, userId, startDate, endDate);
+                ROW_MAPPER, userId, dateTimeHandler(startDate), dateTimeHandler(endDate));
     }
 }
