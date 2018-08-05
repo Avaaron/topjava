@@ -19,7 +19,7 @@ public class PostgresJdbcMealRepositoriImpl extends JdbcMealRepositoryImpl {
     }
 
     @Override
-    protected <T> T dateTimeHandler(LocalDateTime localDateTime) {
-        return (T)localDateTime;
+    protected LocalDateTime dateTimeHandler(LocalDateTime localDateTime) {
+        return localDateTime;
     }
 }

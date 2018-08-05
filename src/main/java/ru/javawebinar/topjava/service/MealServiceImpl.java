@@ -1,6 +1,8 @@
 package ru.javawebinar.topjava.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import ru.javawebinar.topjava.model.Meal;
@@ -14,6 +16,7 @@ import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
 @Service
 public class MealServiceImpl implements MealService {
 
+
     private final MealRepository repository;
 
     @Autowired
@@ -26,11 +29,13 @@ public class MealServiceImpl implements MealService {
         return checkNotFoundWithId(repository.get(id, userId), id);
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     @Override
     public void delete(int id, int userId) {
         checkNotFoundWithId(repository.delete(id, userId), id);
     }
 
+    @Cacheable("users")
     @Override
     public List<Meal> getBetweenDateTimes(LocalDateTime startDateTime, LocalDateTime endDateTime, int userId) {
         Assert.notNull(startDateTime, "startDateTime must not be null");
@@ -38,6 +43,7 @@ public class MealServiceImpl implements MealService {
         return repository.getBetween(startDateTime, endDateTime, userId);
     }
 
+    @Cacheable("users")
     @Override
     public List<Meal> getAll(int userId) {
         return repository.getAll(userId);
