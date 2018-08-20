@@ -193,3 +193,17 @@ Java Enterprise Online Project
 -  <a href="http://www.bookvoed.ru/book?id=639284">Редмонд Э.: Семь баз данных за семь недель. Введение в современные базы данных и идеологию NoSQL</a>
 -  <a href="http://www.ozon.ru/context/detail/id/3174887/">Brian Goetz: Java Concurrency in Practice</a>
 -  <a href="http://bookvoed.ru/book?id=2593572">G.L. McDowell: Cracking the Coding Interview</a>
+
+
+URL:
+для get
+curl -i -X GET http://localhost:8080/topjava/rest/meals/100002
+для getAll
+curl -i -X GET http://localhost:8080/topjava/rest/meals
+для delete
+curl -i -X DELETE http://localhost:8080/topjava/rest/meals/100002
+для getBetween
+curl -i -X GET -H "Content-Type: application/json" http://localhost:8080/topjava/rest/meals/filter?startDateTime=2015-05-30T13:00&endDateTime=2015-05-31T20:00
+для getBetweenNew
+curl -i -X GET -H "Content-Type: application/json" http://localhost:8080/topjava/rest/meals/between?startDate=2015-05-30&startTime=13:00&endDate=2015-05-31&endTime=20:00
+create и update не нашёл как сделать там объект передаётся, так и не разобрался что с этим делать.
