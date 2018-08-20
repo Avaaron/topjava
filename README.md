@@ -197,13 +197,16 @@ Java Enterprise Online Project
 
 URL:
 для get
-curl -i -X GET http://localhost:8080/topjava/rest/meals/100002
+curl -i -X GET "http://localhost:8080/topjava/rest/meals/100002"
 для getAll
-curl -i -X GET http://localhost:8080/topjava/rest/meals
+curl -i -X GET "http://localhost:8080/topjava/rest/meals"
 для delete
-curl -i -X DELETE http://localhost:8080/topjava/rest/meals/100002
+curl -i -X DELETE "http://localhost:8080/topjava/rest/meals/100002"
 для getBetween
-curl -i -X GET -H "Content-Type: application/json" http://localhost:8080/topjava/rest/meals/filter?startDateTime=2015-05-30T13:00&endDateTime=2015-05-31T20:00
+curl -i -X GET -H "Content-Type: application/json" "http://localhost:8080/topjava/rest/meals/filter?startDateTime=2015-05-30T13:00&endDateTime=2015-05-31T20:00"
 для getBetweenNew
-curl -i -X GET -H "Content-Type: application/json" http://localhost:8080/topjava/rest/meals/between?startDate=2015-05-30&startTime=13:00&endDate=2015-05-31&endTime=20:00
-create и update не нашёл как сделать там объект передаётся, так и не разобрался что с этим делать.
+curl -i -X GET -H "Content-Type: application/json" "http://localhost:8080/topjava/rest/meals/between?startDate=2015-05-30&startTime=13:00&endDate=2015-05-31&endTime=20:00"
+для create
+curl "http://localhost:8080/topjava/rest/meals"  -i -d "{\"dateTime\":\"2018-05-28T20:00\",\"description\":\"zavtrak\" ,\"calories\":\"100\"}" -H"Content-Type: application/json"
+для update(у меня на машине срабатывает один раз, потом надо снова переподнимать томкат)
+curl "http://localhost:8080/topjava/rest/meals/100005" -i -X PUT -H "Content-Type: application/json" -d "{\"dateTime\":\"2018-05-28T20:00\",\"description\":\"zavtrak\",\"calories\":\"100\"}"  
