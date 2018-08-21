@@ -3,6 +3,8 @@ package ru.javawebinar.topjava;
 import org.springframework.test.web.servlet.ResultMatcher;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.User;
+import ru.javawebinar.topjava.to.MealWithExceed;
+import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.Month;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static ru.javawebinar.topjava.model.AbstractBaseEntity.START_SEQ;
 import static ru.javawebinar.topjava.web.json.JsonUtil.writeIgnoreProps;
+import static ru.javawebinar.topjava.web.json.JsonUtil.writeValue;
 
 public class MealTestData {
     public static final int MEAL1_ID = START_SEQ + 2;
@@ -30,7 +33,13 @@ public class MealTestData {
     public static final Meal ADMIN_MEAL2 = new Meal(ADMIN_MEAL_ID + 1, of(2015, Month.JUNE, 1, 21, 0), "Админ ужин", 1500);
 
     public static final List<Meal> MEALS = Arrays.asList(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1);
-
+    public static final List<MealWithExceed> MEAL_WITH_EXCEEDS = MealsUtil.getWithExceeded(MEALS, MealsUtil.DEFAULT_CALORIES_PER_DAY);
+    public static final MealWithExceed MEAL6_WE =MEAL_WITH_EXCEEDS.get(0);
+    public static final MealWithExceed MEAL5_WE =MEAL_WITH_EXCEEDS.get(1);
+    public static final MealWithExceed MEAL4_WE =MEAL_WITH_EXCEEDS.get(2);
+    public static final MealWithExceed MEAL3_WE =MEAL_WITH_EXCEEDS.get(3);
+    public static final MealWithExceed MEAL2_WE =MEAL_WITH_EXCEEDS.get(4);
+    public static final MealWithExceed MEAL1_WE =MEAL_WITH_EXCEEDS.get(5);
     public static Meal getCreated() {
         return new Meal(null, of(2015, Month.JUNE, 1, 18, 0), "Созданный ужин", 300);
     }
@@ -51,11 +60,15 @@ public class MealTestData {
         assertThat(actual).usingElementComparatorIgnoringFields("user").isEqualTo(expected);
     }
 
+    public static <T> ResultMatcher contentJson(T expected) {
+        return content().json(writeValue(expected));
+    }
+
     public static ResultMatcher contentJson(Meal... expected) {
-        return content().json(writeIgnoreProps(Arrays.asList(expected)));
+        return content().json(writeValue(Arrays.asList(expected)));
     }
 
     public static ResultMatcher contentJson(Meal expected) {
-        return content().json(writeIgnoreProps(expected));
+        return content().json(writeValue(expected));
     }
 }
