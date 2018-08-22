@@ -1,8 +1,7 @@
 package ru.javawebinar.topjava;
 
-import org.springframework.test.web.servlet.ResultMatcher;
+
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.to.MealWithExceed;
 import ru.javawebinar.topjava.util.MealsUtil;
 
@@ -12,16 +11,14 @@ import java.util.List;
 
 import static java.time.LocalDateTime.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static ru.javawebinar.topjava.model.AbstractBaseEntity.START_SEQ;
-import static ru.javawebinar.topjava.web.json.JsonUtil.writeIgnoreProps;
-import static ru.javawebinar.topjava.web.json.JsonUtil.writeValue;
 
 public class MealTestData {
     public static final int MEAL1_ID = START_SEQ + 2;
     public static final int ADMIN_MEAL_ID = START_SEQ + 8;
     public static final String REST_FILTER_URL = "filter?startDateTime=2015-05-30T13:00&endDateTime=2015-05-31T20:00";
     public static final String REST_BETWEEN_URL = "between?startDate=2015-05-30&startTime=13:00&endDate=2015-05-31&endTime=20:00";
+    public static final String REST_FILTER_URL_WITH_EMPTY_PARAM = "filter?startDateTime=&endDateTime=2015-05-31T20:00";
 
     public static final Meal MEAL1 = new Meal(MEAL1_ID, of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500);
     public static final Meal MEAL2 = new Meal(MEAL1_ID + 1, of(2015, Month.MAY, 30, 13, 0), "Обед", 1000);
@@ -58,17 +55,5 @@ public class MealTestData {
 
     public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
         assertThat(actual).usingElementComparatorIgnoringFields("user").isEqualTo(expected);
-    }
-
-    public static <T> ResultMatcher contentJson(T expected) {
-        return content().json(writeValue(expected));
-    }
-
-    public static ResultMatcher contentJson(Meal... expected) {
-        return content().json(writeValue(Arrays.asList(expected)));
-    }
-
-    public static ResultMatcher contentJson(Meal expected) {
-        return content().json(writeValue(expected));
     }
 }

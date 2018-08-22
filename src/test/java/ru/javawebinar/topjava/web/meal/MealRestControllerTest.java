@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static ru.javawebinar.topjava.MealTestData.*;
+import static ru.javawebinar.topjava.TestUtil.contentJson;
 
 class MealRestControllerTest extends AbstractControllerTest {
 
@@ -89,7 +90,16 @@ class MealRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void getBetweenNew() throws Exception {
+    void getBetweenWithEmptyTest() throws Exception {
+        mockMvc.perform(get(REST_URL + REST_FILTER_URL_WITH_EMPTY_PARAM))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(contentJson(Arrays.asList(MealTestData.MEAL6_WE, MealTestData.MEAL5_WE, MealTestData.MEAL4_WE,
+                        MealTestData.MEAL3_WE, MealTestData.MEAL2_WE, MealTestData.MEAL1_WE)));
+    }
+
+    @Test
+    void getBetweenNewTest() throws Exception {
         mockMvc.perform(get(REST_URL + REST_BETWEEN_URL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

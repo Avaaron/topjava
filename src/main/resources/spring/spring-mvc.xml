@@ -28,6 +28,7 @@
             <set>
                 <bean class="ru.javawebinar.topjava.util.springconverters.DateTimeFormater.LocalDateFormatter"/>
                 <bean class="ru.javawebinar.topjava.util.springconverters.DateTimeFormater.LocalTimeFormatter"/>
+                <bean class="ru.javawebinar.topjava.util.springconverters.DateTimeFormater.LocalDateTimeFormatter"/>
             </set>
         </property>
     </bean>

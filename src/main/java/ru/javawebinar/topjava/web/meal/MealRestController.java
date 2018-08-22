@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static ru.javawebinar.topjava.util.DateTimeUtil.MAX_DATE_TIME;
+import static ru.javawebinar.topjava.util.DateTimeUtil.MIN_DATE_TIME;
+
 @RestController
 @RequestMapping(value = MealRestController.REST_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 public class MealRestController extends AbstractMealController {
@@ -63,8 +66,10 @@ public class MealRestController extends AbstractMealController {
     }
 
     @GetMapping(value = "/filter")
-    public List<MealWithExceed> getBetween(@RequestParam(value = "startDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
-                                           @RequestParam(value = "endDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime) {
+    public List<MealWithExceed> getBetween(@RequestParam(value = "startDateTime")  LocalDateTime startDateTime,
+                                           @RequestParam(value = "endDateTime")    LocalDateTime endDateTime) {
+        startDateTime = (startDateTime == null) ? MIN_DATE_TIME : startDateTime;
+        endDateTime = (endDateTime == null) ? MAX_DATE_TIME : endDateTime;
         return super.getBetween(startDateTime.toLocalDate(), startDateTime.toLocalTime(), endDateTime.toLocalDate(), endDateTime.toLocalTime());
     }
 
