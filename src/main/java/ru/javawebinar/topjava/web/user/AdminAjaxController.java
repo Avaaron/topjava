@@ -1,6 +1,8 @@
 package ru.javawebinar.topjava.web.user;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -34,4 +36,12 @@ public class AdminAjaxController extends AbstractUserController {
             super.create(user);
         }
     }
+
+    @RequestMapping(value = "/enabled/{id}", method = RequestMethod.POST)
+    public void updateEnabled(@RequestParam(value = "enabled") boolean enable, @PathVariable(value = "id") int id) {
+        User user = super.get(id);
+        super.updateEnabled(user, enable);
+
+    }
+
 }

@@ -1,20 +1,33 @@
 function makeEditable() {
-    $(".delete").click(function () {
-        deleteRow($(this).attr("id"));
+    $('#add').click(function () {
+        $('#id').val(0);
+        $('#editRow').modal();
     });
+
+
+    $('#detailsForm').submit(function () {
+        save();
+        return false;
+    });
+
+    $.ajaxSetup({cache: false});
 
     $(document).ajaxError(function (event, jqXHR, options, jsExc) {
-        failNoty(jqXHR);
+        failNoty(event, jqXHR, options, jsExc);
     });
-
-    // solve problem with cache in IE: https://stackoverflow.com/a/4303862/548473
-    $.ajaxSetup({cache: false});
 }
 
 function add() {
     $("#detailsForm").find(":input").val("");
     $("#editRow").modal();
 }
+function del() {
+    $(".str").click(function () {
+        deleteRow($(this).attr("id"));
+    })
+    $.ajaxSetup({cache: false});
+}
+
 
 function deleteRow(id) {
     $.ajax({
@@ -39,13 +52,17 @@ function save() {
         type: "POST",
         url: ajaxUrl,
         data: form.serialize(),
-        success: function () {
+        success: function (data) {
             $("#editRow").modal("hide");
-            updateTable();
+            filter();
             successNoty("Saved");
         }
     });
 }
+
+
+
+
 
 var failedNote;
 
