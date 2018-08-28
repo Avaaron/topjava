@@ -13,13 +13,31 @@ function filter() {
     });
 }
 
-function updateTableByData(data) {
-    datatableApi.clear().rows.add(data).draw();
+function deleteMeal() {
+    $(".str").click(function () {
+        deleteRow($(this).attr("id"));
+        filter();
+    })
+    $.ajaxSetup({cache: false});
 }
 
 function cancel() {
     $("#filter")[0].reset();
     updateTable();
+}
+
+function saveMeal() {
+    var form = $("#detailsForm");
+    $.ajax({
+        type: "POST",
+        url: ajaxUrl,
+        data: form.serialize(),
+        success: function (data) {
+            $("#editRow").modal("hide");
+            filter();
+            successNoty("Saved");
+        }
+    });
 }
 
 // $(document).ready(function () {
@@ -50,7 +68,7 @@ $(function () {
         "order": [
             [
                 0,
-                "asc"
+                "desc"
             ]
         ]
     });

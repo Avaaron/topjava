@@ -42,7 +42,7 @@
                     </td>
                     <td><fmt:formatDate value="${user.registered}" pattern="dd-MMMM-yyyy"/></td>
                     <td><a><span class="fa fa-pencil"></span></a></td>
-                    <td><a onclick="del()"><span class="fa fa-remove"></span></a></td>
+                    <td><a onclick="deleteUser()"><span class="fa fa-remove"></span></a></td>
                 </tr>
             </c:forEach>
         </table>
@@ -84,7 +84,7 @@
                     <span class="fa fa-close"></span>
                     <spring:message code="common.cancel"/>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="save()">
+                <button type="button" class="btn btn-primary" onclick="saveUser()">
                     <span class="fa fa-check"></span>
                     <spring:message code="common.save"/>
                 </button>

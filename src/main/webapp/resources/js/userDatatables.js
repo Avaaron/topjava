@@ -9,9 +9,30 @@ function updateUserEnabled(chkbx, id) {
         type: 'POST',
         data: 'enabled=' + enabled,
         success: function () {
-            updateTable();
             chkbx.closest('tr').toggleClass('disabled');
             successNoty("Статус изменён");
+        }
+    });
+}
+
+function deleteUser() {
+    $(".str").click(function () {
+        deleteRow($(this).attr("id"));
+        updateTable();
+    });
+    $.ajaxSetup({cache: false});
+}
+
+function saveUser() {
+    var form = $("#detailsForm");
+    $.ajax({
+        type: "POST",
+        url: ajaxUrl,
+        data: form.serialize(),
+        success: function () {
+            $("#editRow").modal("hide");
+            updateTable();
+            successNoty("Saved");
         }
     });
 }

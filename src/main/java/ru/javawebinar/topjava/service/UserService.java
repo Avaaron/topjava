@@ -18,7 +18,7 @@ public interface UserService {
 
     void update(User user);
 
-    void updateEnabled(User user, boolean enabled);
+    void updateEnabled(int id, boolean enabled);
 
     List<User> getAll();
 
