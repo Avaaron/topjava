@@ -18,10 +18,7 @@ $(function () {
     datatableApi = $("#datatable").DataTable({
         "ajax": {
             "url": ajaxUrl,
-            "dataSrc": "",
-            saccess: function (data) {
-                $.forEach()
-            }
+            "dataSrc": ""
         },
         "paging": false,
         "info": true,
@@ -68,34 +65,14 @@ $(function () {
         "initComplete": makeEditable
     });
 
-    $('#startDate').datetimepicker({
+    $('#startDate', '#endDate').datetimepicker({
         timepicker: false,
         format:'Y-m-d',
         lang: 'ru',
-        onShow: function (ct) {
-            this.setOptions({
-                maxDate: $('#endDate').val() ? $('#endDate').val() : false
-            })
-        }
+
     });
 
-    $('#endDate').datetimepicker({
-        timepicker: false,
-        format:'Y-m-d',
-        lang: 'ru',
-        onShow: function (ct) {
-            this.setOptions({
-                minDate: $('#startDate').val() ? $('#startDate').val() : false
-            })
-        }
-    });
-
-    $('#startTime').datetimepicker({
-        datepicker: false,
-        format:'H:i'
-    });
-
-    $('#endTime').datetimepicker({
+    $('#startTime', '#endTime').datetimepicker({
         datepicker: false,
         format:'H:i'
     });
