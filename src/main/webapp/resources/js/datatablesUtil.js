@@ -2,6 +2,8 @@ let form;
 
 function makeEditable() {
     form = $('#detailsForm');
+
+
     $(document).ajaxError(function (event, jqXHR, options, jsExc) {
         failNoty(jqXHR);
     });
@@ -15,6 +17,8 @@ function add() {
     form.find(":input").val("");
     $("#editRow").modal();
 }
+
+
 
 function updateRow(id) {
     $("#modalTitle").html(i18n["editTitle"]);

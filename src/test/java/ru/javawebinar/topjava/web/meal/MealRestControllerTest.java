@@ -1,18 +1,22 @@
 package ru.javawebinar.topjava.web.meal;
 
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -31,7 +35,7 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void testGet() throws Exception {
-        mockMvc.perform(get(REST_URL + MEAL1_ID))
+        mockMvc.perform(get(REST_URL + MEAL1_ID).with(userAuth(USER)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -40,7 +44,7 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void testDelete() throws Exception {
-        mockMvc.perform(delete(REST_URL + MEAL1_ID))
+        mockMvc.perform(delete(REST_URL + MEAL1_ID).with(userAuth(USER)))
                 .andExpect(status().isNoContent());
         assertMatch(service.getAll(START_SEQ), MEAL6, MEAL5, MEAL4, MEAL3, MEAL2);
     }
@@ -50,6 +54,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         Meal updated = getUpdated();
 
         mockMvc.perform(put(REST_URL + MEAL1_ID).contentType(MediaType.APPLICATION_JSON)
+                .with(userAuth(USER))
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isOk());
 
@@ -61,6 +66,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         Meal created = getCreated();
         ResultActions action = mockMvc.perform(post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
+                .with(userAuth(USER))
                 .content(JsonUtil.writeValue(created)));
 
         Meal returned = readFromJson(action, Meal.class);
@@ -72,7 +78,7 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void testGetAll() throws Exception {
-        mockMvc.perform(get(REST_URL))
+        mockMvc.perform(get(REST_URL).with(userAuth(USER)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -81,6 +87,7 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     public void testFilter() throws Exception {
         mockMvc.perform(get(REST_URL + "filter")
+                .with(userAuth(USER))
                 .param("startDate", "2015-05-30").param("startTime", "07:00")
                 .param("endDate", "2015-05-31").param("endTime", "11:00"))
                 .andExpect(status().isOk())
@@ -92,9 +99,15 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     public void testFilterAll() throws Exception {
-        mockMvc.perform(get(REST_URL + "filter?startDate=&endTime="))
+        mockMvc.perform(get(REST_URL + "filter?startDate=&endTime=").with(userAuth(USER)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(contentJson(MealsUtil.getWithExceeded(Arrays.asList(MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1), USER.getCaloriesPerDay())));
+    }
+
+    @Test
+    void testGetNotFound() throws Exception {
+        mockMvc.perform(get(REST_URL))
+                .andExpect(status().isUnauthorized());
     }
 }
