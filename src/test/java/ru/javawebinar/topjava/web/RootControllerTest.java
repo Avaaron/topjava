@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static ru.javawebinar.topjava.TestUtil.userAuth;
 import static ru.javawebinar.topjava.UserTestData.ADMIN;
 import static ru.javawebinar.topjava.UserTestData.USER;
+import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
 class RootControllerTest extends AbstractControllerTest {
 
@@ -40,5 +41,4 @@ class RootControllerTest extends AbstractControllerTest {
                 .andExpect(forwardedUrl("/WEB-INF/jsp/meals.jsp"))
                 .andExpect(model().attribute("meals", MealsUtil.getWithExceeded(MealTestData.MEALS, USER.getCaloriesPerDay())));
     }
-
 }
